@@ -13,6 +13,12 @@ Production-ready AWS infrastructure demonstrating modern DevOps practices with I
 
 **Status**: ✅ **DEPLOYED & OPERATIONAL**
 
+## 📸 Live Demo Screenshots
+
+### Modern Web Interface
+![Web Interface Dashboard](screenshots/web-ui-screenshot.png)
+*Screenshot of the deployed web UI showing real-time AWS instance metadata with modern dashboard design*
+
 ## ✨ Current Infrastructure
 
 ### 🏗️ Deployed Resources
@@ -118,6 +124,10 @@ The EC2 instance is automatically configured via user data script that:
 - Card-based layout with smooth transitions
 
 ## 🌐 Live Demo
+
+![Live Demo](screenshots/live-demo.gif)
+*Live demonstration of the interactive web interface*
+
 Once deployed, visit your EC2 instance's public IP to see the modern web interface featuring:
 - Real-time AWS instance metadata
 - Interactive dashboard with animations
