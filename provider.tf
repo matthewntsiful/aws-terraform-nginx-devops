@@ -10,7 +10,7 @@ terraform {
 provider "aws" {
   region = var.aws_region
   alias  = "main"
-  
+
   default_tags {
     tags = {
       Environment = "dev"

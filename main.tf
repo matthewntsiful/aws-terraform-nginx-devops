@@ -16,7 +16,7 @@ AWS Key Pair
 resource "aws_key_pair" "generated_key" {
   key_name   = "matthew-dev-key"
   public_key = tls_private_key.ssh.public_key_openssh
-  
+
   tags = {
     Name        = "matthew-dev-key"
     Environment = "dev"
@@ -35,7 +35,7 @@ resource "local_file" "private_key" {
   content         = tls_private_key.ssh.private_key_pem
   filename        = "${path.module}/matthew-dev-key.pem"
   file_permission = "0400"
-  
+
   lifecycle {
     create_before_destroy = true
   }
@@ -58,7 +58,7 @@ resource "aws_instance" "web" {
 
   # Root volume configuration
   root_block_device {
-    volume_size = 10  # GB
+    volume_size = 10 # GB
     volume_type = "gp3"
     encrypted   = true
   }
@@ -144,7 +144,7 @@ Ubuntu AMI Data Source
 */
 data "aws_ami" "ubuntu" {
   most_recent = true
-  owners      = ["099720109477"]  # Canonical
+  owners      = ["099720109477"] # Canonical
 
   filter {
     name   = "name"

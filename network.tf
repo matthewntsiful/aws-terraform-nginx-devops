@@ -8,7 +8,7 @@ resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
   enable_dns_support   = true
   enable_dns_hostnames = true
-  
+
   tags = {
     Name        = "matthew-dev-vpc"
     Environment = "dev"
@@ -24,7 +24,7 @@ Internet Gateway (IGW)
 */
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
-  
+
   tags = {
     Name        = "matthew-dev-igw"
     Environment = "dev"
@@ -40,7 +40,7 @@ Elastic IP for NAT Gateway
 */
 resource "aws_eip" "nat" {
   domain = "vpc"
-  
+
   tags = {
     Name        = "matthew-dev-eip-nat"
     Environment = "dev"
@@ -57,15 +57,15 @@ NAT Gateway
 */
 resource "aws_nat_gateway" "main" {
   allocation_id = aws_eip.nat.id
-  subnet_id     = aws_subnet.public[0].id  # Place NAT in first public subnet
-  
+  subnet_id     = aws_subnet.public[0].id # Place NAT in first public subnet
+
   tags = {
     Name        = "matthew-dev-ngw"
     Environment = "dev"
     Project     = "matthew"
     ManagedBy   = "terraform"
   }
-  
+
   # Ensure IGW is created before NAT Gateway
   depends_on = [aws_internet_gateway.main]
 }
@@ -81,8 +81,8 @@ resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = var.public_subnet_cidrs[count.index]
   availability_zone       = "${var.aws_region}${count.index % 2 == 0 ? "a" : "b"}"
-  map_public_ip_on_launch = true  # Auto-assign public IP to instances
-  
+  map_public_ip_on_launch = true # Auto-assign public IP to instances
+
   tags = {
     Name        = "matthew-dev-sn-public-${count.index + 1}"
     Environment = "dev"
@@ -103,8 +103,8 @@ resource "aws_subnet" "private" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = var.private_subnet_cidrs[count.index]
   availability_zone       = "${var.aws_region}${count.index % 2 == 0 ? "a" : "b"}"
-  map_public_ip_on_launch = false  # No public IPs for private subnets
-  
+  map_public_ip_on_launch = false # No public IPs for private subnets
+
   tags = {
     Name        = "matthew-dev-sn-private-${count.index + 1}"
     Environment = "dev"
@@ -121,12 +121,12 @@ Public Route Table
 */
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
-  
+
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.main.id
   }
-  
+
   tags = {
     Name        = "matthew-dev-rt-public"
     Environment = "dev"
@@ -143,12 +143,12 @@ Private Route Table
 */
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
-  
+
   route {
     cidr_block     = "0.0.0.0/0"
     nat_gateway_id = aws_nat_gateway.main.id
   }
-  
+
   tags = {
     Name        = "matthew-dev-rt-private"
     Environment = "dev"

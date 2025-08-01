@@ -84,7 +84,7 @@ SSH Connection Command
 output "ssh_connection_command" {
   description = "SSH command to connect to the instance"
   value       = "ssh -i ${local_file.private_key.filename} ubuntu@${aws_instance.web.public_dns}"
-  sensitive   = true  # Contains sensitive key path
+  sensitive   = true # Contains sensitive key path
 }
 
 /*

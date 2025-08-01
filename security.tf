@@ -45,7 +45,7 @@ resource "aws_security_group" "web" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]  # Restrict this in production!
+    cidr_blocks = ["0.0.0.0/0"] # Restrict this in production!
   }
 
   /*
@@ -57,7 +57,7 @@ resource "aws_security_group" "web" {
     description = "Allow all outbound traffic"
     from_port   = 0
     to_port     = 0
-    protocol    = "-1"  # All protocols
+    protocol    = "-1" # All protocols
     cidr_blocks = ["0.0.0.0/0"]
   }
 

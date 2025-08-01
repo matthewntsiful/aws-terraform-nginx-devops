@@ -7,13 +7,13 @@ AWS Region
 variable "aws_region" {
   description = "AWS region to deploy resources"
   type        = string
-  default     = "us-east-1"  # Changed to us-east-1
+  default     = "us-east-1" # Changed to us-east-1
 }
 
 variable "availability_zones" {
   description = "List of availability zones to use"
   type        = list(string)
-  default     = ["us-east-1a", "us-east-1b"]  # Using us-east-1 AZs
+  default     = ["us-east-1a", "us-east-1b"] # Using us-east-1 AZs
 }
 
 
