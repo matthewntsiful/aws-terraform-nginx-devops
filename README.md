@@ -20,7 +20,7 @@ Production-ready AWS infrastructure demonstrating modern DevOps practices with I
 - **EC2 Instance**: Ubuntu server with Nginx (t3.small)
 - **Security Groups**: Web traffic (HTTP/HTTPS) and SSH access
 - **Networking**: Internet Gateway, NAT Gateway, Route Tables
-- **Remote State**: S3 bucket (`terraform-state-x82zf9vy`) with DynamoDB locking
+- **Remote State**: Universal S3 bucket with DynamoDB locking
 - **SSH Key Pair**: Auto-generated for secure access
 
 ### 🔄 CI/CD Pipeline Status
@@ -56,7 +56,7 @@ Production-ready AWS infrastructure demonstrating modern DevOps practices with I
 │                          AWS Infrastructure                      │
 │                                                                 │
 │  ┌─────────────────────────────────────────────────────────┐   │
-│  │                    VPC (10.0.0.0/16)                   │   │
+│  │                    VPC                                  │   │
 │  │                                                         │   │
 │  │  ┌─────────────────┐         ┌─────────────────────┐   │   │
 │  │  │  Public Subnet  │         │   Private Subnet    │   │   │
@@ -70,8 +70,8 @@ Production-ready AWS infrastructure demonstrating modern DevOps practices with I
 │                                                                 │
 │  ┌─────────────────────────────────────────────────────────┐   │
 │  │              Remote State Management                    │   │
-│  │  S3: terraform-state-x82zf9vy                          │   │
-│  │  DynamoDB: terraform-state-lock                        │   │
+│  │  S3: <terraform-state-bucket>                          │   │
+│  │  DynamoDB: <state-lock-table>                          │   │
 │  └─────────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -80,7 +80,8 @@ Production-ready AWS infrastructure demonstrating modern DevOps practices with I
 - **Compute**: EC2 instance (t3.small) running Nginx
 - **Network**: VPC with public/private subnets, NAT Gateway
 - **Security**: Security groups for web traffic and SSH
-- **State**: Remote backend with S3 and DynamoDB
+- **State**: Universal remote backend with S3 and DynamoDB
+- **Backend Repository**: Separate `terraform-backend` for centralized state management
 
 ## 🚀 Quick Start
 
@@ -101,9 +102,9 @@ Production-ready AWS infrastructure demonstrating modern DevOps practices with I
 2. **Configure GitHub Secrets**
    Navigate to Repository Settings → Secrets and Variables → Actions:
    ```
-   AWS_ACCESS_KEY_ID: Your AWS Access Key
-   AWS_SECRET_ACCESS_KEY: Your AWS Secret Key
-   AWS_REGION: us-east-1
+   AWS_ACCESS_KEY_ID: <your-aws-access-key>
+   AWS_SECRET_ACCESS_KEY: <your-aws-secret-key>
+   AWS_REGION: <your-aws-region>
    ```
 
 3. **Deploy via Pipeline**
@@ -129,29 +130,35 @@ terraform apply
 
 ## ⚙️ Configuration Management
 
-### 🌍 Current Configuration
+### 🌍 Configuration
 ```hcl
-# Default values in variables.tf
-aws_region = "us-east-1"
-environment = "dev"
-instance_type = "t3.small"  # Recently upgraded from t3.micro
-vpc_cidr = "10.0.0.0/16"
-public_subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24"]
-private_subnet_cidrs = ["10.0.101.0/24", "10.0.102.0/24"]
-availability_zones = ["us-east-1a", "us-east-1b"]
+# Configurable via variables.tf
+aws_region = "<your-aws-region>"
+environment = "<environment>"
+instance_type = "<instance-type>"
+vpc_cidr = "<vpc-cidr-block>"
+public_subnet_cidrs = ["<subnet-cidrs>"]
+private_subnet_cidrs = ["<subnet-cidrs>"]
+availability_zones = ["<availability-zones>"]
 ```
 
-### 🗄️ Remote State Backend
+### 🗄️ Universal Remote State Backend
 ```hcl
 # Configured in provider.tf
 backend "s3" {
-  bucket         = "terraform-state-x82zf9vy"
-  key            = "nginx-stack/terraform.tfstate"
-  region         = "us-east-1"
-  dynamodb_table = "terraform-state-lock"
+  bucket         = "<terraform-state-bucket>"
+  key            = "<project-name>/terraform.tfstate"
+  region         = "<aws-region>"
+  dynamodb_table = "<state-lock-table>"
   encrypt        = true
 }
 ```
+
+**Centralized State Management:**
+- **Universal Bucket**: Stores state files for all Terraform projects
+- **Project Isolation**: Each project uses a unique key path
+- **Shared Infrastructure**: One backend serves multiple projects
+- **Cost Efficient**: Single S3 bucket and DynamoDB table
 
 ## 🛠️ Operations
 
@@ -183,9 +190,20 @@ terraform output
 
 ### 🔄 State Management
 ```bash
-# State is automatically synchronized
-# Both local and CI/CD use S3 remote state
-# No manual state management required
+# Universal backend for all projects
+# State path: <project-name>/terraform.tfstate
+# Shared S3 bucket: <terraform-state-bucket>
+# Automatic synchronization between local and CI/CD
+```
+
+### 🏗️ Backend Architecture
+```
+terraform-backend/
+├── S3 Bucket: <terraform-state-bucket>
+│   ├── project-1/terraform.tfstate
+│   ├── project-2/terraform.tfstate
+│   └── project-n/terraform.tfstate
+└── DynamoDB: <state-lock-table>
 ```
 
 ## 📋 Pipeline Workflow Details
