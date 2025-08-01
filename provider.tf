@@ -7,10 +7,10 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "terraform-state-x82zf9vy"
+    bucket         = "matthew-terraform-terraform-state-zxwoeb1w"
     key            = "nginx-stack/terraform.tfstate"
     region         = "us-east-1"
-    dynamodb_table = "terraform-state-lock"
+    dynamodb_table = "matthew-terraform-terraform-state-lock"
     encrypt        = true
   }
 }
