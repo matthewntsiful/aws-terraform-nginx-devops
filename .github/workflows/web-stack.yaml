@@ -97,3 +97,5 @@ jobs:
 
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
+
+        #End of the workflow file
