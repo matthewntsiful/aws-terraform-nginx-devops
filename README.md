@@ -24,49 +24,24 @@
 
 Production-ready AWS infrastructure demonstrating modern DevOps practices with Infrastructure as Code (IaC), automated CI/CD pipelines, security best practices, and comprehensive monitoring solutions.
 
-## ✨ DevOps Features
+**Status**: ✅ **DEPLOYED & OPERATIONAL**
 
-### 🏗️ Infrastructure as Code (IaC)
-- **Terraform**: Declarative infrastructure provisioning with state management
-- **Modular Design**: Reusable, maintainable code structure with variable configurations
-- **Remote State**: S3 backend with DynamoDB locking for team collaboration
-- **Environment Separation**: Multi-environment support (dev/staging/prod)
-- **Version Control**: Git-based infrastructure versioning and change tracking
-- **Drift Detection**: Automated infrastructure drift monitoring and alerts
+## ✨ Current Infrastructure
 
-### 🔄 CI/CD Pipeline
-- **Automated Testing**: Terraform format validation, syntax checking, and security scanning
-- **Plan Generation**: Infrastructure change previews with cost estimation
-- **Approval Gates**: Manual approval workflows for production deployments
-- **Artifact Management**: Secure plan storage and retrieval with versioning
-- **Branch Protection**: Main branch deployment controls with required reviews
-- **Rollback Strategy**: Automated rollback capabilities with state restoration
-- **Multi-Environment**: Automated promotion through dev → staging → prod
+### 🏗️ Deployed Resources
+- **VPC**: Custom network (10.0.0.0/16) with public/private subnets
+- **EC2 Instance**: Ubuntu server with Nginx (t3.small)
+- **Security Groups**: Web traffic (HTTP/HTTPS) and SSH access
+- **Networking**: Internet Gateway, NAT Gateway, Route Tables
+- **Remote State**: S3 bucket (`terraform-state-x82zf9vy`) with DynamoDB locking
+- **SSH Key Pair**: Auto-generated for secure access
 
-### 🔒 Security & Compliance
-- **Least Privilege**: IAM roles with minimal required permissions
-- **Secret Management**: AWS Secrets Manager and GitHub encrypted secrets
-- **Network Segmentation**: VPC with public/private subnet isolation
-- **Security Groups**: Granular traffic controls with principle of least access
-- **Encryption**: Data encryption at rest and in transit
-- **Compliance**: SOC2, PCI-DSS ready configurations
-- **Vulnerability Scanning**: Automated security assessments
-
-### 📊 Monitoring & Observability
-- **Infrastructure Monitoring**: AWS CloudWatch with custom metrics and dashboards
-- **Application Performance**: Real-time performance monitoring and alerting
-- **Log Aggregation**: Centralized logging with CloudWatch Logs
-- **Deployment Tracking**: Complete pipeline execution audit trails
-- **Change Auditing**: Terraform state change tracking and notifications
-- **Cost Monitoring**: AWS Cost Explorer integration with budget alerts
-- **Health Checks**: Automated endpoint monitoring and failover
-
-### 🛠️ Operational Excellence
-- **Disaster Recovery**: Multi-AZ deployment with automated backup strategies
-- **High Availability**: Load balancing with auto-scaling capabilities
-- **Performance Optimization**: Resource right-sizing and cost optimization
-- **Documentation**: Auto-generated infrastructure documentation
-- **Runbooks**: Standardized operational procedures and troubleshooting guides
+### 🔄 CI/CD Pipeline Status
+- **Status**: ✅ Active and functional
+- **Triggers**: Push to main branch or manual dispatch
+- **Validation**: Format checking, syntax validation, security scanning
+- **Deployment**: Automated infrastructure provisioning
+- **State Management**: Shared remote state between local and CI/CD
 
 ## 🏛️ Architecture
 
@@ -77,11 +52,6 @@ Production-ready AWS infrastructure demonstrating modern DevOps practices with I
 │  │   Format    │  │  Validate   │  │   Security  │  │    Plan     │ │
 │  │   Check     │  │   Syntax    │  │    Scan     │  │  Generate   │ │
 │  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘ │
-│                                    │                                │
-│                            ┌─────────────┐                         │
-│                            │   Manual    │                         │
-│                            │  Approval   │                         │
-│                            └─────────────┘                         │
 │                                    │                                │
 │                            ┌─────────────┐                         │
 │                            │    Apply    │                         │
@@ -103,29 +73,16 @@ Production-ready AWS infrastructure demonstrating modern DevOps practices with I
 │  │  │ ┌─────────────┐ │    NAT       │ ┌─────────────────┐ │   │   │
 │  │  │ │    EC2      │ │ ◄────────────┤ │   Future        │ │   │   │
 │  │  │ │   (Nginx)   │ │   Gateway    │ │   Resources     │ │   │   │
-│  │  │ │             │ │              │ │                 │ │   │   │
+│  │  │ │  t3.small   │ │              │ │                 │ │   │   │
 │  │  │ └─────────────┘ │              │ └─────────────────┘ │   │   │
-│  │  │                 │              │                     │   │   │
-│  │  │ ┌─────────────┐ │              │                     │   │   │
-│  │  │ │   ALB       │ │              │                     │   │   │
-│  │  │ │ (Optional)  │ │              │                     │   │   │
-│  │  │ └─────────────┘ │              │                     │   │   │
 │  │  └─────────────────┘              └─────────────────────┘   │   │
 │  │                                                             │   │
 │  │  ┌─────────────────────────────────────────────────────┐   │   │
-│  │  │                Security Groups                      │   │   │
-│  │  │  • Web: HTTP(80), HTTPS(443)                       │   │   │
-│  │  │  • SSH: Port 22 (restricted IPs)                   │   │   │
-│  │  │  • Database: Port 3306/5432 (internal only)        │   │   │
+│  │  │            Remote State Backend                     │   │   │
+│  │  │  • S3 Bucket: terraform-state-x82zf9vy             │   │   │
+│  │  │  • DynamoDB: terraform-state-lock                  │   │   │
+│  │  │  • Encryption: AES256                              │   │   │
 │  │  └─────────────────────────────────────────────────────┘   │   │
-│  └─────────────────────────────────────────────────────────────┘   │
-│                                                                     │
-│  ┌─────────────────────────────────────────────────────────────┐   │
-│  │                    Monitoring & Logging                     │   │
-│  │  • CloudWatch Metrics & Dashboards                         │   │
-│  │  • CloudWatch Logs for Application & System Logs          │   │
-│  │  • CloudTrail for API Audit Logging                       │   │
-│  │  • AWS Config for Compliance Monitoring                   │   │
 │  └─────────────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────────────┘
 ```
@@ -133,302 +90,168 @@ Production-ready AWS infrastructure demonstrating modern DevOps practices with I
 ## 🚀 Quick Start
 
 ### Prerequisites
-- **Terraform** >= 1.7.5
-- **AWS CLI** >= 2.0 (configured with appropriate credentials)
-- **Git** >= 2.0
+- **AWS Account** with sufficient permissions
 - **GitHub Account** with Actions enabled
-- **AWS Account** with sufficient permissions for EC2, VPC, IAM
+- **Git** >= 2.0
 
-### 🔧 Local Development Setup
+### 🔧 Deployment Options
 
-1. **Clone Repository**
+#### Option 1: CI/CD Pipeline (Recommended)
+1. **Fork/Clone Repository**
    ```bash
    git clone https://github.com/matthewntsiful/aws-terraform-nginx.git
    cd aws-terraform-nginx
    ```
 
-2. **Configure AWS Credentials**
-   ```bash
-   aws configure
-   # OR use environment variables
-   export AWS_ACCESS_KEY_ID="your-access-key"
-   export AWS_SECRET_ACCESS_KEY="your-secret-key"
-   export AWS_DEFAULT_REGION="us-east-1"
-   ```
-
-3. **Create Terraform Variables**
-   ```bash
-   cp terraform.tfvars.example terraform.tfvars
-   ```
-   
-   Edit `terraform.tfvars`:
-   ```hcl
-   aws_region = "us-east-1"
-   environment = "dev"
-   instance_type = "t3.micro"
-   public_subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24"]
-   private_subnet_cidrs = ["10.0.101.0/24", "10.0.102.0/24"]
-   allowed_ssh_cidrs = ["YOUR_IP/32"]
-   ```
-
-4. **Initialize and Deploy**
-   ```bash
-   terraform init
-   terraform validate
-   terraform plan
-   terraform apply
-   ```
-
-### 🔄 CI/CD Pipeline Setup
-
-1. **GitHub Secrets Configuration**
+2. **Configure GitHub Secrets**
    Navigate to Repository Settings → Secrets and Variables → Actions:
    ```
    AWS_ACCESS_KEY_ID: Your AWS Access Key
    AWS_SECRET_ACCESS_KEY: Your AWS Secret Key
-   AWS_REGION: Your preferred AWS region (e.g., us-east-1)
+   AWS_REGION: us-east-1
    ```
 
-2. **Pipeline Triggers**
-   - **Push to main**: Triggers validation and planning
-   - **Pull Request**: Runs full validation suite
-   - **Manual Dispatch**: Allows manual deployment approval
-   - **Scheduled**: Weekly infrastructure drift detection
+3. **Deploy via Pipeline**
+   ```bash
+   # Make any configuration changes
+   git add .
+   git commit -m "Deploy infrastructure"
+   git push origin main
+   ```
 
-3. **Deployment Workflow**
-   ```
-   Feature Branch → PR → Validation → Review → Merge → Deploy
-   ```
+#### Option 2: Local Development
+```bash
+# Configure AWS credentials
+aws configure
+
+# Initialize and deploy
+terraform init
+terraform plan
+terraform apply
+```
+
+**Note**: Both methods use the same S3 remote state for consistency.
+
+## ⚙️ Configuration Management
+
+### 🌍 Current Configuration
+```hcl
+# Default values in variables.tf
+aws_region = "us-east-1"
+environment = "dev"
+instance_type = "t3.small"  # Recently upgraded from t3.micro
+vpc_cidr = "10.0.0.0/16"
+public_subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24"]
+private_subnet_cidrs = ["10.0.101.0/24", "10.0.102.0/24"]
+availability_zones = ["us-east-1a", "us-east-1b"]
+```
+
+### 🗄️ Remote State Backend
+```hcl
+# Configured in provider.tf
+backend "s3" {
+  bucket         = "terraform-state-x82zf9vy"
+  key            = "nginx-stack/terraform.tfstate"
+  region         = "us-east-1"
+  dynamodb_table = "terraform-state-lock"
+  encrypt        = true
+}
+```
+
+## 🛠️ Operations
+
+### 🚀 Making Changes
+```bash
+# Method 1: Via CI/CD Pipeline (Recommended)
+git add .
+git commit -m "Update infrastructure"
+git push origin main
+# → Triggers automatic deployment
+
+# Method 2: Local Development
+terraform plan    # Preview changes
+terraform apply   # Apply changes
+```
+
+### 📊 Monitoring
+```bash
+# Check current infrastructure
+terraform state list
+terraform show
+
+# View deployment history
+# GitHub Actions → Workflow runs
+
+# Access deployed application
+terraform output
+```
+
+### 🔄 State Management
+```bash
+# State is automatically synchronized
+# Both local and CI/CD use S3 remote state
+# No manual state management required
+```
 
 ## 📋 Pipeline Workflow Details
 
 ### 🔍 Continuous Integration
 - **Code Quality**: Terraform format checking with `terraform fmt`
 - **Syntax Validation**: Configuration validation with `terraform validate`
-- **Security Scanning**: Infrastructure security analysis with tfsec/checkov
+- **Security Scanning**: Infrastructure security analysis
 - **Plan Generation**: Detailed change impact assessment
-- **Cost Estimation**: Infrastructure cost analysis and budgeting
-- **Compliance Checks**: Policy validation against organizational standards
 
 ### 🚀 Continuous Deployment
-- **Approval Gates**: Manual review process for production changes
-- **Blue-Green Deployment**: Zero-downtime deployment strategies
-- **Rollback Capability**: Automated rollback with state restoration
-- **Environment Promotion**: Staged deployment across environments
-- **Health Checks**: Post-deployment validation and monitoring
-- **Notification System**: Slack/Teams integration for deployment status
+- **Automated Deployment**: Push to main triggers deployment
+- **State Synchronization**: Remote state ensures consistency
+- **Change Tracking**: Complete audit trail of infrastructure changes
 
 ## 🏆 DevOps Best Practices Implemented
 
-### 📝 Version Control & GitOps
-- **Infrastructure as Code**: All infrastructure defined in version control
-- **Branch Protection**: Enforced code reviews and status checks
-- **Semantic Versioning**: Tagged releases with changelog generation
-- **Git Hooks**: Pre-commit validation and formatting
-- **Change Documentation**: Automated change log generation
+### ✅ Achieved
+- **Infrastructure as Code**: All infrastructure defined in Terraform
+- **Remote State Management**: S3 backend with DynamoDB locking
+- **CI/CD Pipeline**: Automated validation and deployment
+- **Security**: Encrypted state, secure networking, IAM best practices
+- **Version Control**: Git-based infrastructure versioning
+- **Environment Consistency**: Same state shared across environments
 
-### 🧪 Testing Strategy
-- **Unit Tests**: Terraform module testing with Terratest
-- **Integration Tests**: End-to-end infrastructure validation
-- **Security Tests**: Automated vulnerability scanning
-- **Performance Tests**: Load testing and capacity planning
-- **Chaos Engineering**: Fault injection and resilience testing
+## 🔧 Troubleshooting
 
-### 🔐 Security Implementation
-- **Zero Trust Architecture**: Network segmentation and micro-segmentation
-- **Encryption Everywhere**: Data encryption at rest and in transit
-- **Identity Management**: Centralized IAM with role-based access
-- **Secrets Rotation**: Automated credential rotation and management
-- **Audit Logging**: Comprehensive audit trails and compliance reporting
-- **Vulnerability Management**: Continuous security scanning and patching
+### ✅ Resolved Issues
+- **Remote State**: Successfully configured with S3 backend
+- **Pipeline Integration**: GitHub Actions workflow operational
+- **State Synchronization**: Local and CI/CD environments synchronized
 
-### 📊 Monitoring & Alerting
-- **Infrastructure Metrics**: CPU, memory, disk, network monitoring
-- **Application Metrics**: Custom business metrics and KPIs
-- **Log Analysis**: Centralized logging with search and analytics
-- **Alerting Rules**: Intelligent alerting with escalation policies
-- **Dashboards**: Real-time operational dashboards
-- **SLA Monitoring**: Service level agreement tracking and reporting
-
-## ⚙️ Configuration Management
-
-### 🌍 Environment Variables
-```hcl
-# terraform.tfvars
-aws_region = "us-east-1"
-environment = "production"
-instance_type = "t3.micro"
-vpc_cidr = "10.0.0.0/16"
-public_subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24"]
-private_subnet_cidrs = ["10.0.101.0/24", "10.0.102.0/24"]
-enable_nat_gateway = true
-enable_vpn_gateway = false
-enable_dns_hostnames = true
-enable_dns_support = true
-```
-
-### 🔧 Pipeline Configuration
-```yaml
-# .github/workflows/web-stack.yaml
-env:
-  TF_VERSION: '1.7.5'
-  AWS_DEFAULT_REGION: 'us-east-1'
-  TF_IN_AUTOMATION: 'true'
-```
-
-### 📦 Module Configuration
-```hcl
-# modules/networking/variables.tf
-variable "vpc_cidr" {
-  description = "CIDR block for VPC"
-  type        = string
-  default     = "10.0.0.0/16"
-}
-
-variable "availability_zones" {
-  description = "Availability zones for subnets"
-  type        = list(string)
-  default     = ["us-east-1a", "us-east-1b"]
-}
-```
-
-## 🛠️ Operations Guide
-
-### 🚀 Deployment Operations
+### 🔧 Common Operations
 ```bash
-# Manual deployment with plan review
-terraform plan -out=tfplan
-terraform apply tfplan
+# Format code before committing
+terraform fmt
 
-# Environment-specific deployment
-terraform workspace select production
-terraform apply -var-file="environments/prod.tfvars"
+# Validate configuration
+terraform validate
 
-# Targeted resource deployment
-terraform apply -target=module.networking
-```
-
-### 📊 Monitoring Operations
-```bash
-# Infrastructure status check
-terraform show
+# Check state synchronization
 terraform state list
 
-# Resource inspection
-terraform state show aws_instance.web_server
-aws ec2 describe-instances --instance-ids i-1234567890abcdef0
-
-# Log monitoring
-aws logs tail /aws/ec2/nginx --follow
+# View current outputs
+terraform output
 ```
 
-### 🔄 Rollback Procedures
-```bash
-# Emergency rollback
-terraform plan -destroy
-terraform destroy -target=aws_instance.web_server
-
-# State restoration
-terraform state pull > backup.tfstate
-terraform state push backup.tfstate
-
-# Version rollback
-git checkout v1.2.3
-terraform init
-terraform apply
-```
-
-## 🔧 Troubleshooting Guide
-
-### ⚠️ Common Issues
-
-#### Permission Errors
-```bash
-# Verify AWS credentials
-aws sts get-caller-identity
-
-# Check IAM permissions
-aws iam simulate-principal-policy \
-  --policy-source-arn arn:aws:iam::123456789012:user/username \
-  --action-names ec2:RunInstances \
-  --resource-arns "*"
-```
-
-#### State Lock Issues
-```bash
-# Force unlock (use with caution)
-terraform force-unlock LOCK_ID
-
-# Check DynamoDB lock table
-aws dynamodb scan --table-name terraform-state-lock
-```
-
-#### Resource Conflicts
-```bash
-# Import existing resources
-terraform import aws_instance.web_server i-1234567890abcdef0
-
-# Remove from state without destroying
-terraform state rm aws_instance.web_server
-```
-
-### 🚨 Pipeline Failures
-
-#### GitHub Actions Debugging
-```yaml
-# Enable debug logging
-- name: Debug Terraform
-  run: |
-    export TF_LOG=DEBUG
-    terraform plan
-```
-
-#### Secret Validation
-```bash
-# Test AWS credentials in Actions
-- name: Validate AWS Credentials
-  run: aws sts get-caller-identity
-```
-
-## 📈 Performance Optimization
-
-### 💰 Cost Optimization
-- **Right-sizing**: Automated instance type recommendations
-- **Reserved Instances**: Cost analysis and RI purchasing recommendations
-- **Spot Instances**: Integration for non-critical workloads
-- **Resource Scheduling**: Automated start/stop for development environments
-
-### ⚡ Performance Tuning
-- **Auto Scaling**: Dynamic scaling based on metrics
-- **Load Balancing**: Traffic distribution and health checks
-- **Caching**: CloudFront CDN integration
-- **Database Optimization**: RDS performance insights and tuning
+### 🚨 If Issues Occur
+- **Pipeline Failures**: Check GitHub Actions logs
+- **State Conflicts**: Ensure no concurrent operations
+- **AWS Permissions**: Verify IAM policies for S3, EC2, VPC access
 
 ## 🤝 Contributing
 
 ### 📋 Development Workflow
 1. **Fork Repository**: Create personal fork
 2. **Feature Branch**: `git checkout -b feature/new-feature`
-3. **Development**: Implement changes with tests
-4. **Validation**: Run local validation suite
-5. **Pull Request**: Submit PR with detailed description
-6. **Code Review**: Peer review and approval
-7. **CI/CD Pipeline**: Automated testing and validation
-8. **Merge**: Merge to main branch after approval
-
-### 📝 Code Standards
-- **Terraform**: Follow HashiCorp style guide
-- **Documentation**: Update README and inline comments
-- **Testing**: Include unit and integration tests
-- **Security**: Security scanning and compliance checks
-
-### 🔍 Review Checklist
-- [ ] Code follows style guidelines
-- [ ] Tests pass locally and in CI
-- [ ] Documentation updated
-- [ ] Security scan passes
-- [ ] Performance impact assessed
-- [ ] Backward compatibility maintained
+3. **Development**: Implement changes with validation
+4. **Pull Request**: Submit PR with detailed description
+5. **CI/CD Pipeline**: Automated testing and validation
+6. **Merge**: Automatic deployment after approval
 
 ## 📄 License
 
