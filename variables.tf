@@ -78,7 +78,7 @@ EC2 Instance Type
 variable "instance_type" {
   description = "EC2 instance type for the web server"
   type        = string
-  default     = "t3.small"
+  default     = "t3.micro"
 
   validation {
     condition     = can(regex("^[a-z0-9]+\\.\\w+$", var.instance_type))

@@ -22,6 +22,7 @@ Production-ready AWS infrastructure demonstrating modern DevOps practices with I
 - **Networking**: Internet Gateway, NAT Gateway, Route Tables
 - **Remote State**: Universal S3 bucket with DynamoDB locking
 - **SSH Key Pair**: Auto-generated for secure access
+- **Modern Web Interface**: Dynamic dashboard with real-time instance data
 
 ### 🔄 CI/CD Pipeline Status
 - **Status**: ✅ Active and functional
@@ -29,6 +30,14 @@ Production-ready AWS infrastructure demonstrating modern DevOps practices with I
 - **Validation**: Format checking, syntax validation, security scanning
 - **Deployment**: Automated infrastructure provisioning
 - **State Management**: Shared remote state between local and CI/CD
+
+### 🎨 Web Interface Features
+- **Modern Dashboard**: Responsive design with gradient backgrounds and animations
+- **Real-time Data**: Dynamic instance metadata (ID, type, IPs, region)
+- **Interactive Cards**: Hover effects and smooth transitions
+- **Technology Stack**: Visual badges showing AWS, Terraform, Nginx, Ubuntu
+- **Status Monitoring**: Infrastructure health indicators with color-coded status
+- **Mobile Responsive**: Optimized for all device sizes
 
 ## 🏛️ Architecture & Workflow
 
@@ -82,6 +91,38 @@ Production-ready AWS infrastructure demonstrating modern DevOps practices with I
 - **Security**: Security groups for web traffic and SSH
 - **State**: Universal remote backend with S3 and DynamoDB
 - **Backend Repository**: Separate `terraform-backend` for centralized state management
+- **User Data Automation**: Automated web server setup and modern interface deployment
+
+### 📜 User Data Script Features
+The EC2 instance is automatically configured via user data script that:
+
+**System Setup:**
+- Installs and configures Nginx web server
+- Updates Ubuntu packages and installs utilities (curl, jq)
+- Sets up proper file permissions and service management
+
+**Dynamic Web Interface:**
+- Fetches real-time instance metadata from AWS metadata service
+- Creates a modern, responsive HTML dashboard with:
+  - Instance details (ID, type, region, availability zone)
+  - Network configuration (public/private IPs, VPC info)
+  - Technology stack visualization with icons
+  - Infrastructure status monitoring
+  - Interactive animations and hover effects
+
+**Professional Presentation:**
+- Gradient backgrounds with modern CSS styling
+- Font Awesome icons for visual appeal
+- Mobile-responsive design
+- Real-time timestamp and contact information
+- Card-based layout with smooth transitions
+
+## 🌐 Live Demo
+Once deployed, visit your EC2 instance's public IP to see the modern web interface featuring:
+- Real-time AWS instance metadata
+- Interactive dashboard with animations
+- Technology stack showcase
+- Infrastructure status monitoring
 
 ## 🚀 Quick Start
 

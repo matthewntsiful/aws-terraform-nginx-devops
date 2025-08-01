@@ -343,6 +343,8 @@ resource "aws_instance" "web" {
                                   <span class="tech-badge"><i class="fab fa-ubuntu"></i> Ubuntu 20.04</span>
                                   <span class="tech-badge"><i class="fab fa-github"></i> GitHub Actions</span>
                                   <span class="tech-badge"><i class="fas fa-shield-alt"></i> Security Groups</span>
+                                  <span class="tech-badge"><i class="fas fa-cloud"></i> VPC</span>
+                                  <span class="tech-badge"><i class="fas fa-database"></i> S3 + DynamoDB</span>
                               </div>
                           </div>
                           
