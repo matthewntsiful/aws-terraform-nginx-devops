@@ -7,11 +7,11 @@ terraform {
   }
 
   backend "s3" {
-    bucket       = "matthew-terraform-terraform-state-zxwoeb1w"
-    key          = "nginx-stack/terraform.tfstate"
-    region       = "us-east-1"
-    encrypt      = true
-    use_lockfile = true
+    bucket         = "matthew-terraform-terraform-state-zxwoeb1w"
+    key            = "nginx-stack/terraform.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "matthew-terraform-terraform-state-lock"
+    encrypt        = true
   }
 }
 
