@@ -21,6 +21,20 @@ on:
         - '.github/ISSUE_TEMPLATE/**'
         - 'scripts/**'
     workflow_dispatch:
+      inputs:
+        action:
+          description: 'Choose action to perform'
+          required: true
+          default: 'apply'
+          type: choice
+          options:
+            - apply
+            - destroy
+        confirm_destroy:
+          description: 'Type "destroy" to confirm infrastructure destruction'
+          required: false
+          default: ''
+          type: string
 env:
   TF_VERSION: '1.7.5'
 
@@ -65,10 +79,14 @@ jobs:
           path: tfplan
 
   apply:
-    name: Terraform Apply (Manual Approval)
+    name: Terraform Apply
     needs: terraform
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    if: |
+      github.ref == 'refs/heads/main' && (
+        github.event_name == 'push' || 
+        (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply')
+      )
 
     steps:
       - name: Checkout repository
@@ -97,5 +115,65 @@ jobs:
 
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
+
+  destroy:
+    name: Terraform Destroy
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' && 
+      github.event.inputs.action == 'destroy' &&
+      github.event.inputs.confirm_destroy == 'destroy'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Backup State
+        run: |
+          echo "Creating state backup..."
+          terraform state pull > state-backup-$(date +%Y%m%d-%H%M%S).json
+
+      - name: Terraform Destroy Plan
+        run: terraform plan -destroy -out=destroy-plan
+
+      - name: Terraform Destroy
+        run: |
+          echo "🚨 DESTROYING INFRASTRUCTURE 🚨"
+          terraform apply -auto-approve destroy-plan
+          echo "✅ Infrastructure destroyed successfully"
+
+  # Safety check job that fails if destroy is attempted without proper confirmation
+  destroy_safety_check:
+    name: Destroy Safety Check
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' && 
+      github.event.inputs.action == 'destroy' &&
+      github.event.inputs.confirm_destroy != 'destroy'
+
+    steps:
+      - name: Safety Check Failed
+        run: |
+          echo "❌ DESTROY BLOCKED: Confirmation required"
+          echo "To destroy infrastructure, you must:"
+          echo "1. Select 'destroy' action"
+          echo "2. Type 'destroy' in the confirmation field"
+          echo "3. This is a safety measure to prevent accidental destruction"
+          exit 1
 
         #End of the workflow file
