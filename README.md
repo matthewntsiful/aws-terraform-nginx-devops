@@ -35,15 +35,18 @@ Production-ready AWS infrastructure demonstrating modern DevOps practices with I
 - **Triggers**: Push to main branch or manual dispatch
 - **Validation**: Format checking, syntax validation, security scanning
 - **Deployment**: Automated infrastructure provisioning
-- **State Management**: Shared remote state between local and CI/CD
+- **Manual Destroy**: Safe destroy with confirmation requirements
+- **State Management**: S3 + DynamoDB with automatic lock recovery
+- **Dependencies**: Improved job sequencing and error handling
 
 ### 🎨 Web Interface Features
 - **Modern Dashboard**: Responsive design with gradient backgrounds and animations
 - **Real-time Data**: Dynamic instance metadata (ID, type, IPs, region)
 - **Interactive Cards**: Hover effects and smooth transitions
-- **Technology Stack**: Visual badges showing AWS, Terraform, Nginx, Ubuntu
+- **Technology Stack**: Visual badges showing AWS, Terraform, Nginx, Ubuntu, GitHub Actions
 - **Status Monitoring**: Infrastructure health indicators with color-coded status
 - **Mobile Responsive**: Optimized for all device sizes
+- **Auto-Generated**: Created via user data script with dynamic content
 
 ## 🏛️ Architecture & Workflow
 
@@ -141,43 +144,65 @@ Once deployed, visit your EC2 instance's public IP to see the modern web interfa
 - **GitHub Account** with Actions enabled
 - **Git** >= 2.0
 
-### 🔧 Deployment Options
+### 🎯 Deployment Methods
 
-#### Option 1: CI/CD Pipeline (Recommended)
-1. **Fork/Clone Repository**
-   ```bash
-   git clone https://github.com/matthewntsiful/aws-terraform-nginx.git
-   cd aws-terraform-nginx
-   ```
+#### Method 1: Automatic Deployment
+- **Trigger**: Push to main branch
+- **Process**: Validate → Plan → Apply
+- **Use Case**: Regular development workflow
 
-2. **Configure GitHub Secrets**
-   Navigate to Repository Settings → Secrets and Variables → Actions:
-   ```
-   AWS_ACCESS_KEY_ID: <your-aws-access-key>
-   AWS_SECRET_ACCESS_KEY: <your-aws-secret-key>
-   AWS_REGION: <your-aws-region>
-   ```
+#### Method 2: Manual Deployment
+- **Trigger**: GitHub Actions → "Run workflow"
+- **Action**: Select "apply"
+- **Process**: Validate → Plan → Apply
+- **Use Case**: Controlled deployments
 
-3. **Deploy via Pipeline**
-   ```bash
-   # Make any configuration changes
-   git add .
-   git commit -m "Deploy infrastructure"
-   git push origin main
-   ```
+#### Method 3: Manual Destroy
+- **Trigger**: GitHub Actions → "Run workflow"
+- **Action**: Select "destroy"
+- **Confirmation**: Type "destroy" in confirmation field
+- **Process**: Validate → Backup → Destroy → Cleanup
+- **Use Case**: Safe infrastructure removal
 
-#### Option 2: Local Development
+### 🔧 Setup Instructions
+
+#### 1. Repository Setup
 ```bash
-# Configure AWS credentials
-aws configure
-
-# Initialize and deploy
-terraform init
-terraform plan
-terraform apply
+git clone https://github.com/matthewntsiful/aws-terraform-nginx-devops.git
+cd aws-terraform-nginx-devops
 ```
 
-**Note**: Both methods use the same S3 remote state for consistency.
+#### 2. Configure GitHub Secrets
+Navigate to Repository Settings → Secrets and Variables → Actions:
+```
+AWS_ACCESS_KEY_ID: <your-aws-access-key>
+AWS_SECRET_ACCESS_KEY: <your-aws-secret-key>
+AWS_REGION: <your-aws-region>
+```
+
+#### 3. Deploy Infrastructure
+
+**Automatic (Push to Main):**
+```bash
+git add .
+git commit -m "Deploy infrastructure"
+git push origin main
+```
+
+**Manual (GitHub Actions):**
+1. Go to Actions → "Terraform CI/CD"
+2. Click "Run workflow"
+3. Select "apply" action
+4. Click "Run workflow"
+
+#### 4. Destroy Infrastructure (When Needed)
+1. Go to Actions → "Terraform CI/CD"
+2. Click "Run workflow"
+3. Select "destroy" action
+4. Type "destroy" in confirmation field
+5. Click "Run workflow"
+
+**Note**: All methods use the same S3 remote state for consistency.
 
 ## ⚙️ Configuration Management
 
@@ -214,14 +239,23 @@ backend "s3" {
 ## 🛠️ Operations
 
 ### 🚀 Making Changes
+
+#### Via CI/CD Pipeline (Recommended)
 ```bash
-# Method 1: Via CI/CD Pipeline (Recommended)
 git add .
 git commit -m "Update infrastructure"
 git push origin main
 # → Triggers automatic deployment
+```
 
-# Method 2: Local Development
+#### Via Manual Trigger
+1. Push changes to repository
+2. Go to GitHub Actions
+3. Select "Run workflow" → "apply"
+4. Monitor deployment progress
+
+#### Local Development (Optional)
+```bash
 terraform plan    # Preview changes
 terraform apply   # Apply changes
 ```
@@ -264,11 +298,22 @@ terraform-backend/
 - **Syntax Validation**: Configuration validation with `terraform validate`
 - **Security Scanning**: Infrastructure security analysis
 - **Plan Generation**: Detailed change impact assessment
+- **Dependency Checks**: Jobs only run after successful validation
 
 ### 🚀 Continuous Deployment
 - **Automated Deployment**: Push to main triggers deployment
+- **Manual Triggers**: Workflow dispatch for apply/destroy operations
 - **State Synchronization**: Remote state ensures consistency
 - **Change Tracking**: Complete audit trail of infrastructure changes
+- **Safety Mechanisms**: Confirmation required for destroy operations
+
+### 🛡️ Manual Destroy Workflow
+- **Manual Trigger Only**: Prevents accidental infrastructure destruction
+- **Double Confirmation**: Must select "destroy" action AND type "destroy"
+- **Safety Check**: Blocks operation if confirmation is missing
+- **State Backup**: Automatic backup before destruction
+- **Dependency Chain**: Validation → Destroy → Cleanup
+- **Auto-Recovery**: DynamoDB locks auto-expire to prevent deadlocks
 
 ## 🏆 DevOps Best Practices Implemented
 
@@ -288,6 +333,8 @@ terraform-backend/
 - **State Synchronization**: Local and CI/CD environments synchronized
 
 ### 🔧 Common Operations
+
+#### Local Commands
 ```bash
 # Format code before committing
 terraform fmt
@@ -300,12 +347,37 @@ terraform state list
 
 # View current outputs
 terraform output
+
+# Force unlock stale locks (if needed)
+terraform force-unlock <lock-id>
 ```
 
-### 🚨 If Issues Occur
-- **Pipeline Failures**: Check GitHub Actions logs
-- **State Conflicts**: Ensure no concurrent operations
-- **AWS Permissions**: Verify IAM policies for S3, EC2, VPC access
+#### GitHub Actions Operations
+- **Deploy**: Push to main or manual trigger with "apply"
+- **Destroy**: Manual trigger with "destroy" + confirmation
+- **Monitor**: Check Actions tab for workflow status
+- **Troubleshoot**: Review workflow logs for errors
+
+### 🚨 Troubleshooting
+
+#### Common Issues
+- **State Lock Conflicts**: Wait 20 minutes for auto-expiry or force unlock
+- **Pipeline Failures**: Check GitHub Actions logs for detailed errors
+- **AWS Permissions**: Verify IAM policies for S3, EC2, VPC, DynamoDB access
+- **Destroy Blocked**: Ensure "destroy" is typed exactly in confirmation field
+
+#### State Lock Recovery
+```bash
+# If locks are stuck, they auto-expire in 20 minutes
+# Or force unlock manually:
+terraform force-unlock <lock-id>
+```
+
+#### Workflow Dependencies
+- All jobs depend on successful validation
+- Apply/Destroy only run after terraform job succeeds
+- Safety checks prevent accidental operations
+- Automatic cleanup after successful operations
 
 ## 🤝 Contributing
 
