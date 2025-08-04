@@ -80,13 +80,13 @@ jobs:
 
   apply:
     name: Terraform Apply
-    needs: terraform
+    needs: [terraform]
     runs-on: ubuntu-latest
     if: |
       github.ref == 'refs/heads/main' && (
         github.event_name == 'push' || 
         (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply')
-      )
+      ) && needs.terraform.result == 'success'
 
     steps:
       - name: Checkout repository
@@ -112,17 +112,23 @@ jobs:
         with:
           name: terraform-plan
           path: .
+        continue-on-error: false
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
+        run: |
+          echo "🚀 APPLYING INFRASTRUCTURE"
+          terraform apply -auto-approve tfplan
+          echo "✅ Infrastructure deployed successfully"
 
   destroy:
     name: Terraform Destroy
+    needs: [terraform]
     runs-on: ubuntu-latest
     if: |
       github.event_name == 'workflow_dispatch' && 
       github.event.inputs.action == 'destroy' &&
-      github.event.inputs.confirm_destroy == 'destroy'
+      github.event.inputs.confirm_destroy == 'destroy' &&
+      needs.terraform.result == 'success'
 
     steps:
       - name: Checkout repository
@@ -157,6 +163,12 @@ jobs:
           terraform apply -auto-approve destroy-plan
           echo "✅ Infrastructure destroyed successfully"
 
+      - name: Cleanup Plan Artifacts
+        if: always()
+        run: |
+          rm -f destroy-plan state-backup-*.json
+          echo "🧹 Cleanup completed"
+
   # Safety check job that fails if destroy is attempted without proper confirmation
   destroy_safety_check:
     name: Destroy Safety Check
@@ -175,5 +187,18 @@ jobs:
           echo "2. Type 'destroy' in the confirmation field"
           echo "3. This is a safety measure to prevent accidental destruction"
           exit 1
+
+  # Cleanup job that runs after successful operations
+  cleanup:
+    name: Cleanup Artifacts
+    needs: [apply, destroy]
+    runs-on: ubuntu-latest
+    if: always() && (needs.apply.result == 'success' || needs.destroy.result == 'success')
+
+    steps:
+      - name: Clean up artifacts
+        run: |
+          echo "🧹 Cleaning up workflow artifacts"
+          echo "Operation completed successfully"
 
         #End of the workflow file
