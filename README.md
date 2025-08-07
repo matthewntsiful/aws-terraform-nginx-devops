@@ -53,46 +53,56 @@ Production-ready AWS infrastructure demonstrating modern DevOps practices with I
 ### CI/CD Workflow
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#f0f0f0', 'primaryTextColor': '#000', 'primaryBorderColor': '#666', 'lineColor': '#333', 'secondaryColor': '#e0e0e0', 'tertiaryColor': '#d0d0d0'}}}%%
 flowchart TD
-    subgraph Developer[Developer Workflow]
-        A[Code Changes] -->|git push| B[GitHub Repository]
+    %% Developer Workflow
+    subgraph Developer["Developer Workflow"]
+        A["Code Changes"] -->|git push| B["GitHub Repository"]
     end
 
-    subgraph GitHub[GitHub Actions Pipeline]
-        B --> C[Terraform fmt]
-        C --> D[Terraform validate]
-        D --> E[Terraform plan]
-        E --> F[Terraform apply]
+    %% CI/CD Pipeline
+    subgraph GitHub["GitHub Actions Pipeline"]
+        B --> C["Terraform fmt"]
+        C --> D["Terraform validate"]
+        D --> E["Terraform plan"]
+        E --> F["Terraform apply"]
     end
 
-    subgraph AWS[AWS Infrastructure]
-        G[VPC]
+    %% AWS Infrastructure
+    subgraph AWS["AWS Infrastructure"]
+        G["VPC (10.0.0.0/16)"]
         
-        subgraph Public[Public Subnet]
-            H[EC2 Instance\n(Nginx)]
+        subgraph Public["Public Subnet"]
+            H["EC2 Instance (t3.small) with Nginx"]
         end
         
-        subgraph Private[Private Subnet]
-            I[NAT Gateway]
+        subgraph Private["Private Subnet"]
+            I["NAT Gateway"]
         end
         
-        subgraph Remote[Remote State]
-            J[S3 Bucket\nterraform-state-bucket]
-            K[DynamoDB\nstate-lock-table]
+        subgraph Remote["Remote State"]
+            J["S3 Bucket: terraform-state-bucket"]
+            K["DynamoDB: state-lock-table"]
         end
         
         H <-->|NAT| I
     end
     
-    F -->|Provision| AWS
+    F -->|Provision & Configure| AWS
     
-    style Developer fill:#f9f,stroke:#333,stroke-width:2px
-    style GitHub fill:#bbf,stroke:#333,stroke-width:2px
-    style AWS fill:#bfb,stroke:#333,stroke-width:2px
-    style Public fill:#fbb,stroke:#333,stroke-width:2px
-    style Private fill:#fbb,stroke:#333,stroke-width:2px
-    style Remote fill:#fbb,stroke:#333,stroke-width:2px
-```
+    %% Styling
+    classDef dev fill:#e1f5fe,stroke:#0288d1,stroke-width:2px,color:#01579b
+    classDef ci fill:#e8f5e9,stroke:#388e3c,stroke-width:2px,color:#1b5e20
+    classDef aws fill:#fbe9e7,stroke:#d84315,stroke-width:2px,color:#bf360c
+    classDef subnet fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#e65100
+    classDef state fill:#f3e5f5,stroke:#8e24aa,stroke-width:2px,color:#6a1b9a
+    
+    %% Apply Styles
+    class Developer dev
+    class GitHub ci
+    class AWS aws
+    class Public,Private subnet
+    class Remote state
 ```
 
 ### Infrastructure Components
